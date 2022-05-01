@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
@@ -35,7 +35,16 @@ def home():
 
 @app.route('/store', methods=['POST'])
 def create_store():
-    pass
+    request_data = request.get_json()
+    if request_data['id'] not in stores.keys():
+        new_store = {
+            'name': request_data['name'],
+            'items': {}
+        }
+        stores[request_data['id']] = new_store
+        return jsonify(new_store)
+    else:
+        return jsonify("Store already exist; Object not created.")
 
 
 @app.route('/store', methods=['GET'])
@@ -50,11 +59,6 @@ def get_store(name):
             return jsonify(stores[key])
 
 
-@app.route('/store/<string:name>/item', methods=['POST'])
-def create_item_in_store():
-    pass
-
-
 @app.route('/store/<string:name>/<string:item>', methods=["GET"])
 def get_items_in_store(name, item):
     for key in stores.keys():
@@ -62,6 +66,11 @@ def get_items_in_store(name, item):
             for second_key in stores[key]['items'].keys():
                 if item == second_key:
                     return jsonify(stores[key]['items'][second_key])
+
+
+@app.route('/store/<string:name>/item', methods=['POST'])
+def create_item_in_store():
+    pass
 
 
 app.run(port=5000)
